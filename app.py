@@ -56,7 +56,8 @@ def process_image(filepath):
 
 def process_pdf(filepath):
     text = ""
-    images = convert_from_path(filepath, pdfinfo_path='/usr/bin/pdfinfo')
+    images = convert_from_path(filepath, poppler_path='/usr/bin')
+    #images = convert_from_path(filepath, pdfinfo_path='/usr/bin/pdfinfo')
     #images = convert_from_path(filepath)
     for image in images:
         text += pytesseract.image_to_string(image, lang="eng")
