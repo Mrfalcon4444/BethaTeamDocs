@@ -10,6 +10,9 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Set the environment variable for poppler-utils
+ENV PATH="/usr/bin:${PATH}"
+
 # Install any needed packages specified in requirements.txt
 WORKDIR /app
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
@@ -25,3 +28,5 @@ ENV FLASK_APP=app.py
 
 # Run app.py when the container launches
 CMD ["flask", "run", "--host", "0.0.0.0", "--port", "80"]
+
+
