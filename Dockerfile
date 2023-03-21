@@ -1,32 +1,23 @@
-# Use an official Python runtime as a parent image
-FROM python:3.8-slim
+FROM python:3.8
 
-# Install any needed packages specified in requirements.txt
-COPY requirements.txt /app/requirements.txt
+WORKDIR /app
 
-# Install poppler-utils
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 RUN apt-get update && \
     apt-get install -y poppler-utils && \
-    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Set the environment variable for poppler-utils
 ENV PATH="/usr/bin:${PATH}"
 
-# Install any needed packages specified in requirements.txt
-WORKDIR /app
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
+RUN ln -s /usr/bin/pdfinfo /usr/local/bin/pdfinfo
 
-# Copy the rest of the application
-COPY . /app
+COPY . .
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
+CMD ["gunicorn", "--workers=3", "--bind=0.0.0.0:5000", "app:app"]
 
-# Define environment variable
-ENV FLASK_APP=app.py
 
-# Run app.py when the container launches
-CMD ["flask", "run", "--host", "0.0.0.0", "--port", "80"]
+
 
 
