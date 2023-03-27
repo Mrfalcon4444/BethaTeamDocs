@@ -8,14 +8,13 @@ RUN apt-get update && apt-get install -y poppler-utils
 WORKDIR /app
 
 # Copy requirements.txt and install dependencies
-
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install poppler-utils
 RUN apt-get update && \
     apt-get install -y poppler-utils && \
-    rm -rf /var/lib/apt/lists/*
+    ln -s /usr/bin/poppler-utils /usr/bin/pdfinfo
 
 # Copy the rest of the application code
 COPY . .
@@ -25,3 +24,4 @@ EXPOSE 8000
 
 # Start the application
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+
