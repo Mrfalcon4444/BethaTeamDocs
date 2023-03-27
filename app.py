@@ -55,8 +55,10 @@ def process_image(filepath):
     return text
 
 def process_pdf(filepath):
-    text = ""
-    images = convert_from_path(filepath)
+    poppler_path = "/usr/bin"  # Assuming the Poppler utilities are installed in /usr/bin
+    images = convert_from_path(filepath, poppler_path=poppler_path)
+    #text = ""
+    #images = convert_from_path(filepath)
     for image in images:
         text += pytesseract.image_to_string(image, lang="eng")
     return text
