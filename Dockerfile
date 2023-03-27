@@ -1,11 +1,15 @@
 # Use the official Python image as the base image
 FROM python:3.8-slim
 
+# Install Poppler utilities
+RUN apt-get update && apt-get install -y poppler-utils
+
 # Set the working directory
 WORKDIR /app
 
 # Copy requirements.txt and install dependencies
-COPY requirements.txt .
+
+COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install poppler-utils
@@ -20,4 +24,4 @@ COPY . .
 EXPOSE 8000
 
 # Start the application
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
