@@ -56,7 +56,7 @@ def process_image(filepath):
 
 def process_pdf(filepath):
     poppler_path = "/usr/bin"  # Assuming the Poppler utilities are installed in /usr/bin
-    images = convert_from_path(filepath)
+    images = convert_from_path(file_path, poppler_path=poppler_path)
     #text = ""
     #images = convert_from_path(filepath)
     for image in images:
