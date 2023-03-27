@@ -11,6 +11,9 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Create symlink for pdfinfo
+RUN ln -s /usr/bin/pdfinfo /usr/local/bin/pdfinfo
+
 # Copy the rest of the application code
 COPY . .
 
@@ -19,6 +22,7 @@ EXPOSE 5000
 
 # Start the application
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+
 
 
 
