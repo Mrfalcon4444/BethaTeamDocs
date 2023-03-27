@@ -8,12 +8,8 @@ RUN apt-get update && apt-get install -y poppler-utils
 WORKDIR /app
 
 # Copy requirements.txt and install dependencies
-
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Create a symlink for pdfinfo
-RUN ln -s /usr/bin/pdfinfo /usr/bin/pdfinfo
 
 # Copy the rest of the application code
 COPY . .
