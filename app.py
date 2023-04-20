@@ -32,12 +32,13 @@ def generate_filename(name, doc_type, date, extension):
 
 nav_bar = '''
 <nav>
-    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo" style="width: 50px; height: auto; margin-right: 20px;">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="width: 50px; height: auto; margin-right: 20px;">
     <a href="{{ url_for('home') }}">Inicio</a>
     <a href="{{ url_for('upload_file') }}">Conversor</a>
     <a href="{{ url_for('about') }}">Acerca de</a>
 </nav>
 '''
+
 
 styles = '''
 <style>
@@ -88,6 +89,20 @@ styles = '''
     li {
         margin-bottom: 10px;
     }
+      nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa;
+    padding: 10px 0;
+  }
+  nav img {
+    position: absolute;
+    left: 10px;
+  }
+  nav a {
+    margin: 0 20px;
+  }
 </style>
 '''
 
