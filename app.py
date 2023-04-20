@@ -1,6 +1,6 @@
 import img2pdf
 import shutil
-from flask import Flask, request, redirect, url_for, send_file
+from flask import Flask, request, redirect, url_for, send_file, render_template_string
 from werkzeug.utils import secure_filename
 from PIL import Image
 import pytesseract
@@ -30,7 +30,49 @@ def generate_filename(name, doc_type, date, extension):
     date_part = date.replace("-", "")
     return f"{name_part}_{doc_type_part}_{date_part}.{extension}"
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
+def home():
+    home_template = '''
+    <!doctype html>
+    <html lang="es">
+      <head>
+        <meta charset="utf-8">
+        <title>Inicio - Conversor de documentos</title>
+      </head>
+      <body>
+        <h1>Bienvenido al Conversor de documentos</h1>
+        <p>Esta aplicación convierte archivos PDF e imágenes a archivos de texto (TXT) y comprime los archivos en un archivo ZIP.</p>
+        <p><a href="{{ url_for('upload_file') }}">Haga clic aquí para comenzar la conversión</a></p>
+        <p><a href="{{ url_for('about') }}">Acerca de</a></p>
+      </body>
+    </html>
+    '''
+    return render_template_string(home_template)
+
+@app.route('/about', methods=['GET'])
+def about():
+    about_template = '''
+    <!doctype html>
+    <html lang="es">
+      <head>
+        <meta charset="utf-8">
+        <title>Acerca de - Conversor de documentos</title>
+      </head>
+      <body>
+        <h1>Equipo</h1>
+        <ul>
+          <li>Miembro del equipo 1</li>
+          <li>Miembro del equipo 2</li>
+          <li>Miembro del equipo 3</li>
+          <li>Miembro del equipo 4</li>
+        </ul>
+        <p><a href="{{ url_for('home') }}">Volver al inicio</a></p>
+      </body>
+    </html>
+    '''
+    return render_template_string(about_template)
+
+@app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -42,6 +84,7 @@ def upload_file():
             name = request.form['name']
             doc_type = request.form['doc_type']
             date = request.form['date']
+            filename = secure_filename
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
@@ -78,26 +121,35 @@ def upload_file():
 
             # Return the download link for the zip file
             return send_file(zip_output_path, as_attachment=True, download_name=zip_filename)
-    return '''
+    upload_template = '''
     <!doctype html>
-    <title>Subir archivo PDF o imagen</title>
-    <h1>Subir archivo PDF o imagen</h1>
-    <form method=post enctype=multipart/form-data>
-      <label for=name>Nombre:</label>
-      <input type=text name=name required>
-      <br>
-      <label for=doc_type>Tipo      de documento:</label>
-      <input type=text name=doc_type required>
-      <br>
-      <label for=date>Fecha:</label>
-      <input type=date name=date required>
-      <br>
-      <label for=file>Archivo:</label>
-      <input type=file name=file>
-      <br>
-      <input type=submit value=Subir>
-    </form>
+    <html lang="es">
+      <head>
+        <meta charset="utf-8">
+        <title>Subir archivo PDF o imagen</title>
+      </head>
+      <body>
+        <h1>Subir archivo PDF o imagen</h1>
+        <form method=post enctype=multipart/form-data>
+          <label for=name>Nombre:</label>
+          <input type=text name=name required>
+          <br>
+          <label for=doc_type>Tipo de documento:</label>
+          <input type=text name=doc_type required>
+          <br>
+          <label for=date>Fecha:</label>
+          <input type=date name=date required>
+          <br>
+          <label for=file>Archivo:</label>
+          <input type=file name=file>
+          <br>
+          <input type=submit value=Subir>
+        </form>
+        <p><a href="{{ url_for('home') }}">Volver al inicio</a></p>
+      </body>
+    </html>
     '''
+    return render_template_string(upload_template)
 
 def process_image(filepath):
     image = Image.open(filepath)
@@ -115,4 +167,3 @@ def process_pdf(filepath):
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
     #app.run(debug=True)
-
