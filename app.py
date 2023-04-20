@@ -39,17 +39,17 @@ nav_bar = '''
 </nav>
 '''
 
-
 styles = '''
 <style>
   body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    background-color: #F2DEBA;
   }
 
   h1 {
-    background-color: #4CAF50;
+    background-color: #0E5E6F;
     color: white;
     text-align: center;
     padding: 1rem;
@@ -61,6 +61,8 @@ styles = '''
     flex-direction: column;
     align-items: center;
     padding: 1rem;
+    background-color: #FFEFD6;
+    border-radius: 10px;
   }
 
   label,
@@ -68,30 +70,45 @@ styles = '''
     margin: 0.5rem;
   }
 
+  input[type=submit] {
+    background-color: #3A8891;
+    color: white;
+    cursor: pointer;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+  }
+
+  input[type=submit]:hover {
+    background-color: #0E5E6F;
+  }
+
   nav {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f8f9fa;
-    padding: 10px 0;
+    background-color: #3A8891;
+    padding: 12px 0; /* Aumentado de 10px a 12px */
   }
 
   nav img {
     position: absolute;
     left: 10px;
+    margin-bottom: 2px; /* Añadido margen inferior para evitar que el logo se pase */
   }
 
   nav a {
     margin: 0 20px;
     text-decoration: none;
-    color: #333;
+    color: #F2DEBA;
   }
 
   nav a:hover {
-    color: #4CAF50;
+    color: #FFEFD6;
   }
 </style>
 '''
+
 
 @app.route('/', methods=['GET'])
 def home():
