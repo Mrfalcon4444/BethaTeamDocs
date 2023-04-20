@@ -42,66 +42,53 @@ nav_bar = '''
 
 styles = '''
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f0f2f5;
-    }
-    nav {
-        background-color: #007bff;
-        padding: 10px;
-        display: flex;
-        justify-content: space-around;
-    }
-    nav a {
-        color: white;
-        text-decoration: none;
-        font-size: 18px;
-    }
-    nav a:hover {
-        text-decoration: underline;
-    }
-    h1 {
-        text-align: center;
-        margin-bottom: 30px;
-    }
-    form {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    label, input[type="file"] {
-        margin-bottom: 15px;
-    }
-    input[type="submit"] {
-        background-color: #007bff;
-        color: white;
-        padding: 10px;
-        font-size: 16px;
-        border: none;
-        cursor: pointer;
-    }
-    input[type="submit"]:hover {
-        background-color: #0056b3;
-    }
-    ul {
-        list-style-type: none;
-    }
-    li {
-        margin-bottom: 10px;
-    }
-      nav {
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1 {
+    background-color: #4CAF50;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    margin: 0;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+  }
+
+  label,
+  input {
+    margin: 0.5rem;
+  }
+
+  nav {
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: #f8f9fa;
     padding: 10px 0;
   }
+
   nav img {
     position: absolute;
     left: 10px;
   }
+
   nav a {
     margin: 0 20px;
+    text-decoration: none;
+    color: #333;
+  }
+
+  nav a:hover {
+    color: #4CAF50;
   }
 </style>
 '''
@@ -118,6 +105,7 @@ def home():
       </head>
       <body>
         ''' + nav_bar + '''
+        <br>
         <h1>¡Bienvenido a la aplicación de administración de archivos personales en la nube de Betha Team!</h1>
         <p>¿Estás cansado de perder tiempo buscando documentos importantes en tu computadora o en una pila de papeles? ¿Te gustaría tener acceso a todos tus archivos personales desde cualquier lugar y en cualquier momento? ¡Entonces nuestra aplicación es la solución para ti!</p>
         <p>Nuestra aplicación realiza un OCR y convierte imágenes en PDF para que puedas organizar tus archivos de manera rápida y sencilla. Además, modificamos los nombres de los archivos para que sean útiles y fáciles de encontrar. Y para ahorrar espacio, todos los documentos generados se pasan a un archivo ZIP. De esta manera podras subir tus archivos al servicio de nube de tu preferencia y tener todo debidamente organizado, manteniendo tu tus archivos faciles de encontrar a la vez que ahorras espacio y dinero.</p>
@@ -186,6 +174,7 @@ def upload_file():
       </head>
       <body>
         ''' + nav_bar + '''
+        <br>
         <h1>Subir archivo PDF o imagen</h1>
         <form method=post enctype=multipart/form-data>
           <label for=name>Nombre:</label>
@@ -219,6 +208,7 @@ def about():
       </head>
       <body>
         ''' + nav_bar + '''
+        <br>
         <h1>Acerca de</h1>
         <p>Equipo:</p>
         <ul>
