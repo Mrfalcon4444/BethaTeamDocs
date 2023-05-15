@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Conversión</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+        <ul class="menu">
+            <li><a href="{{ url_for('home') }}">Inicio</a></li>
+            {% if 'username' in session %}
+                <li><a href="{{ url_for('upload_file') }}">Conversión</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('about') }}">Acerca de</a></li>
+            {% if 'username' in session %}
+            <li>Bienvenido(a), {{ session['username'] }}</li>
+            <li><a href="{{ url_for('logout') }}">Cerrar sesión</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Iniciar sesión</a></li>
+            <li><a href="{{ url_for('register') }}">Registro</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <h1>Subir archivo PDF o imagen</h1>
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_file') }}">
+            <div class="form-group">
+                <label for="name">Nombre:</label>
+                <input type="text" name="name" required>
+            </div>
+            <div class="form-group">
+               <label for="doc_type">Tipo de documento:</label>
+               <select name="doc_type" required class="custom-select">
+                <option value="">Seleccione el tipo de documento</option>
+                <optgroup label="Imágenes">
+                    <option value="png">PNG</option>
+                    <option value="jpg">JPG</option>
+                    <option value="gif">GIF</option>
+                    <option value="svg">SVG</option>
+                    <!-- Agrega más tipos de imágenes aquí -->
+                </optgroup>
+                <optgroup label="Documentos">
+                    <option value="pdf">PDF</option>
+                    <option value="doc">DOC</option>
+                    <option value="docx">DOCX</option>
+                    <option value="txt">TXT</option>
+                    <!-- Agrega más tipos de documentos aquí -->
+                </optgroup>
+                <optgroup label="Gráficas">
+                    <option value="csv">CSV</option>
+                    <option value="xls">XLS</option>
+                    <option value="xlsx">XLSX</option>
+                    <!-- Agrega más tipos de gráficas aquí -->
+                </optgroup>
+                <optgroup label="Programación">
+                    <option value="py">Python</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                    <option value="js">JavaScript</option>
+                    <!-- Agrega más tipos de archivos de programación aquí -->
+                </optgroup>
+                <!-- Agrega más grupos y opciones según tus necesidades -->
+            </select>
+            
+            </div>
+            <div class="form-group">
+                <label for="date">Fecha:</label>
+                <input type="date" name="date" required>
+            </div>
+            <div class="form-group">
+                <label for="file">Archivo:</label>
+                <input type="file" name="file" required>
+            </div>
+            <input type="submit" value="Subir">
+        </form>
+    </div>
+</body>
+</html>

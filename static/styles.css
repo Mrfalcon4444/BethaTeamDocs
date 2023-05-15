@@ -1,0 +1,288 @@
+body {
+    font-family: "Century Gothic", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    text-align: center;
+    background-color: #F2DEBA;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    width: 50px;
+    height: auto;
+    margin-right: 20px;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #3A8891;
+    padding: 12px 20px;
+    color: #FFFFFF;
+}
+
+.menu {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    justify-content: center;
+}
+
+.menu li {
+    margin: 0 10px;
+}
+
+.menu a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.menu a:hover {
+    color: #FFEFD6;
+}
+
+.nav-right {
+    margin-left: auto;
+}
+
+@media (max-width: 600px) {
+    nav {
+        justify-content: flex-start;
+    }
+
+    .menu {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .menu li {
+        margin: 5px 0;
+    }
+
+    .nav-right {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
+
+
+/* Estilos para el formulario de inicio de sesión */
+.login-form {
+    margin: 20px auto;
+    max-width: 300px;
+    padding: 20px;
+    background-color: #F2DEBA;
+    border: 1px solid #CCCCCC;
+    border-radius: 4px;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #CCCCCC;
+    border-radius: 4px;
+    box-sizing: border-box; /* Añade esta línea para incluir el relleno en el ancho total */
+    font-family: "Century Gothic", sans-serif; /* Aplica la tipografía "Century Gothic" */
+}
+
+
+.login-form button {
+    padding: 10px 20px;
+    background-color: #3A8891;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: block; /* Centra el botón */
+    margin: 0 auto; /* Centra el botón */
+    font-family: "Century Gothic", sans-serif; /* Aplica la tipografía "Century Gothic" */
+}
+
+.login-form button:hover {
+    background-color: #309185;
+}
+
+
+/* Estilos para el formulario de registro */
+.register-form {
+    margin: 20px auto;
+    max-width: 300px;
+    padding: 20px;
+    background-color: #F2DEBA;
+    border: 1px solid #CCCCCC;
+    border-radius: 4px;
+}
+
+.register-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-family: "Century Gothic", sans-serif;
+}
+
+.register-form input[type="text"],
+.register-form input[type="email"],
+.register-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    border: 1px solid #CCCCCC;
+    border-radius: 4px;
+    font-family: "Century Gothic", sans-serif;
+}
+
+.register-form button {
+    display: block;
+    width: 100%;
+    padding: 10px 20px;
+    background-color: #3A8891;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: "Century Gothic", sans-serif;
+}
+
+.register-form button:hover {
+    background-color: #309185;
+}
+
+
+/* Diseño del conversor */
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    text-align: center;
+    background-color: #F2DEBA;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-family: "Century Gothic", sans-serif;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.custom-select,
+input[type="text"],
+input[type="date"],
+input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: "Century Gothic", sans-serif;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+    background-color: #3A8891;
+    color: #FFFFFF;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: "Century Gothic", sans-serif;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+    background-color: #226F78;
+}
+
+input[type="file"]::-webkit-file-upload-button::before {
+    content: "Seleccionar archivo";
+}
+
+input[type="file"]::-webkit-file-upload-button::after {
+    content: "Explorar";
+    margin-left: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-family: "Century Gothic", sans-serif;
+}
+
+input[type="submit"] {
+    background-color: #3A8891;
+    color: #FFFFFF;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: "Century Gothic", sans-serif;
+}
+
+input[type="submit"]:hover {
+    background-color: #226F78;
+}
+
+
+
+/* Media queries para ajustar el diseño en pantallas más pequeñas */
+@media (max-width: 600px) {
+    .container {
+        margin: 20px;
+        padding: 10px;
+    }
+
+    input[type="submit"] {
+        font-size: 14px;
+    }
+}
+
+
+/* Estilos personalizados para la página Acerca de */
+.about-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .about-title {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .about-description {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+  
+  .about-img {
+    width: 100%;
+    max-width: 400px;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 20px;
+  }
+
+  .about-img-line {
+    height: 1px;
+    background-color: #000; /* Cambia el color según tus preferencias */
+    margin: 20px 0; /* Ajusta el margen según sea necesario */
+  }
+  

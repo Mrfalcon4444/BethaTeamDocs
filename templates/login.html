@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Iniciar sesión</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <nav>
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+
+    <ul class="menu">
+      <li><a href="{{ url_for('home') }}">Inicio</a></li>
+      {% if 'username' in session %}
+          <li><a href="{{ url_for('upload_file') }}">Conversión</a></li>
+      {% endif %}
+        <li><a href="{{ url_for('about') }}">Acerca de</a></li>
+        <li><a href="{{ url_for('login') }}">Iniciar sesión</a></li>
+        <li><a href="{{ url_for('register') }}">Registro</a></li>
+    </ul>
+  </nav>
+    
+  <div class="login-form">
+    <h1>Iniciar sesión</h1>
+    <form method="POST">
+        <label for="username">Usuario:</label>
+        <input type="text" id="username" name="username">
+
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" name="password">
+
+        <button type="submit">Iniciar sesión</button>
+    </form>
+</div>
+
+</body>
+</html>

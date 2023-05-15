@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Acerca de</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-FddmxSS3MkHuR3HT3PVxr/jUMXzOp+m+SHv9UjPLn8a4F5clSY8AjuMbgNzH4qjdrfJyZ69pyIbNWJqf/DgHgQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <nav>
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+
+    <ul class="menu">
+      <li><a href="{{ url_for('home') }}">Inicio</a></li>
+      {% if 'username' in session %}
+        <li><a href="{{ url_for('upload_file') }}">Conversión</a></li>
+      {% endif %}
+      <li><a href="{{ url_for('about') }}">Acerca de</a></li>
+      {% if 'username' in session %}
+        <li>Bienvenido(a), {{ session['username'] }}</li>
+        <li><a href="{{ url_for('logout') }}">Cerrar sesión</a></li>
+      {% else %}
+        <li><a href="{{ url_for('login') }}">Iniciar sesión</a></li>
+        <li><a href="{{ url_for('register') }}">Registro</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <div class="about-container">
+    <div class="about-container">
+      <h1 class="about-title">Acerca de</h1>
+      <div class="about-img-line"></div>
+
+      <p class="about-description">Bienvenido(a) a Betha Team, tu solución para administrar y convertir archivos en línea.</p>
+      <p class="about-description">En Betha Team, nos dedicamos a brindar una experiencia de administración de archivos eficiente y fácil de usar. Nuestra plataforma tiene como objetivo abordar la problemática del extravío de documentos importantes, como actas de nacimiento, tareas o certificados, proporcionando una solución en línea que permite a las personas almacenar sus documentos en la nube de manera segura y organizada.</p>
+      <p class="about-description">La plataforma ofrece una variedad de funcionalidades, incluyendo la carga, almacenamiento y acceso a documentos desde cualquier lugar con conexión a internet. Los usuarios también podrán compartir documentos con otros usuarios y utilizar herramientas de gestión, como la búsqueda, categorización, etiquetado y descarga de archivos.</p>
+      <p class="about-description">Nuestros objetivos principales son:</p>
+      <ol class="about-objectives">
+        <!-- Lista de objetivos -->
+      </ol>
+      <p class="about-description">La plataforma estará dirigida principalmente a personas mayores de 13 años que necesiten almacenar y gestionar documentos importantes como actas de nacimiento, tareas o certificados. Estará disponible para usuarios de habla hispana en cualquier parte del mundo.</p>
+    </div>
+    
+    <!-- Sección de contacto -->
+    <div class="contact-section">
+      <h2 class="contact-title">¡Contáctanos!</h2>
+      <p class="contact-description">Si tienes alguna pregunta o sugerencia, no dudes en ponerte en contacto con nosotros. Estamos aquí para ayudarte.</p>
+      <div class="contact-info">
+        <div class="contact-item">
+          <p class="contact-text">🖄 Correo electrónico: info@bethateam.com</p>
+        </div>
+        <div class="contact-item">
+          <p class="contact-text">☏ Teléfono: +1 123 456 789</p>
+        </div>
+        <div class="contact-item">
+          <p class="contact-text">· Dirección: Calle Principal, Ciudad, País</p>
+        </div>
+      </div>
+    </div>
+    
+    
+  </div>
+</body>
+</html>

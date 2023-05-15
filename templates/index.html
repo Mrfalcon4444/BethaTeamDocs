@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inicio</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <nav>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+
+        <ul class="menu">
+            <li><a href="{{ url_for('home') }}">Inicio</a></li>
+            {% if 'username' in session %}
+                <li><a href="{{ url_for('upload_file') }}">Conversión</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('about') }}">Acerca de</a></li>
+            {% if 'username' not in session %}
+                <li><a href="{{ url_for('login') }}">Iniciar sesión</a></li>
+                <li><a href="{{ url_for('register') }}">Registro</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>¡Bienvenido a la aplicación de administración de archivos personales en la nube de Betha Team!</h1>
+        <p>¿Estás cansado de perder tiempo buscando documentos importantes en tu computadora o en una pila de papeles? ¿Te gustaría tener acceso a todos tus archivos personales desde cualquier lugar y en cualquier momento? ¡Entonces nuestra aplicación es la solución para ti!</p>
+        <p>Nuestra aplicación realiza un OCR y convierte imágenes en PDF para que puedas organizar tus archivos de manera rápida y sencilla. Además, modificamos los nombres de los archivos para que sean útiles y fáciles de encontrar. Y para ahorrar espacio, todos los documentos generados se pasan a un archivo ZIP. De esta manera podrás subir tus archivos al servicio de nube de tu preferencia y tener todo debidamente organizado, manteniendo tus archivos fáciles de encontrar a la vez que ahorras espacio y dinero.</p>
+        <p>La administración de archivos personales nunca ha sido tan fácil. ¡Únete a nuestra aplicación hoy mismo y comienza a tener control total sobre tus archivos personales!</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

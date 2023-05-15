@@ -1,6 +1,6 @@
-import img2pdf
+import hashlib
 import shutil
-from flask import Flask, request, redirect, url_for, send_file, render_template_string
+from flask import Flask, request, redirect, url_for, send_file, render_template, session, send_from_directory
 from werkzeug.utils import secure_filename
 from PIL import Image
 import pytesseract
@@ -8,14 +8,19 @@ from pdf2image import convert_from_path
 import os
 from flask import make_response
 import zipfile
+import fitz
+import mysql.connector
+from docx import Document
+
 
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'outputs'
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = r'C:\Users\danna\Dropbox\ProyectoBethaTeam'
 app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
+app.secret_key = 'secret_key'  # Clave secreta para firmar las sesiones
 
 # Crear el directorio de salida si no existe
 if not os.path.exists(OUTPUT_FOLDER):
@@ -30,110 +35,138 @@ def generate_filename(name, doc_type, date, extension):
     date_part = date.replace("-", "")
     return f"{name_part}_{doc_type_part}_{date_part}.{extension}"
 
-nav_bar = '''
-<nav>
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="width: 50px; height: auto; margin-right: 20px;">
-    <a href="{{ url_for('home') }}">Inicio</a>
-    <a href="{{ url_for('upload_file') }}">Conversor</a>
-    <a href="{{ url_for('about') }}">Acerca de</a>
-</nav>
-'''
+def create_connection():
+    conn = None
+    try:
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",  # No se requiere contraseña para el usuario root
+            database="proyecto"  # Nombre de tu base de datos
+        )
+        print('Conexión a la base de datos establecida.')
+    except mysql.connector.Error as e:
+        print(f'Error al conectar a la base de datos: {e}')
+    return conn
 
-styles = '''
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #F2DEBA;
-  }
+def login_user(conn, username, password):
+    sql = '''
+    SELECT * FROM users WHERE username = %s;
+    '''
+    try:
+        cursor = conn.cursor()
+        cursor.execute(sql, (username,))
+        result = cursor.fetchone()
+        if result:
+            stored_password = result[3]
+            hashed_password = hashlib.sha256(password.encode()).hexdigest()
+            if hashed_password == stored_password:
+                print('Inicio de sesión exitoso.')
+                return True
+            else:
+                print('Credenciales inválidas.')
+                return False
+        else:
+            print('Credenciales inválidas.')
+            return False
+    except mysql.connector.Error as e:
+        print(f'Error al iniciar sesión: {e}')
+        return False
 
-  h1 {
-    background-color: #0E5E6F;
-    color: white;
-    text-align: center;
-    padding: 1rem;
-    margin: 0;
-  }
 
-  form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1rem;
-    background-color: #FFEFD6;
-    border-radius: 10px;
-  }
+def register_user(conn, username, email, password, confirm_password):
+    if password != confirm_password:
+        print("Las contraseñas no coinciden.")
+        return False
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Verificar si el usuario ya existe en la base de datos (por nombre de usuario o correo electrónico)
+        sql = "SELECT * FROM users WHERE username = %s OR email = %s"
+        cursor.execute(sql, (username, email))
+        result = cursor.fetchone()
+        if result:
+            if result[1] == username:
+                print("El nombre de usuario ya está registrado.")
+            elif result[2] == email:
+                print("El correo electrónico ya está registrado.")
+            return False
 
-  label,
-  input {
-    margin: 0.5rem;
-  }
-
-  input[type=submit] {
-    background-color: #3A8891;
-    color: white;
-    cursor: pointer;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-  }
-
-  input[type=submit]:hover {
-    background-color: #0E5E6F;
-  }
-
-  nav {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #3A8891;
-    padding: 12px 0; /* Aumentado de 10px a 12px */
-  }
-
-  nav img {
-    position: absolute;
-    left: 10px;
-    margin-bottom: 2px; /* Añadido margen inferior para evitar que el logo se pase */
-  }
-
-  nav a {
-    margin: 0 20px;
-    text-decoration: none;
-    color: #F2DEBA;
-  }
-
-  nav a:hover {
-    color: #FFEFD6;
-  }
-</style>
-'''
-
+        # Registrar al usuario en la base de datos
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        sql = "INSERT INTO users (username, email, password, confirm_password) VALUES (%s, %s, %s, %s)"
+        values = (username, email, hashed_password, confirm_password)
+        cursor.execute(sql, values)
+        conn.commit()
+        print('Usuario registrado exitosamente.')
+        return True
+    
+    except mysql.connector.Error as e:
+        print(f'Error al registrar el usuario: {e}')
+        return False
+    
 
 @app.route('/', methods=['GET'])
 def home():
-    home_template = '''
-    <!doctype html>
-    <html lang="es">
-      <head>
-        <meta charset="utf-8">
-        <title>Inicio - Conversor de documentos</title>
-        ''' + styles + '''
-      </head>
-      <body>
-        ''' + nav_bar + '''
-        <br>
-        <h1>¡Bienvenido a la aplicación de administración de archivos personales en la nube de Betha Team!</h1>
-        <p>¿Estás cansado de perder tiempo buscando documentos importantes en tu computadora o en una pila de papeles? ¿Te gustaría tener acceso a todos tus archivos personales desde cualquier lugar y en cualquier momento? ¡Entonces nuestra aplicación es la solución para ti!</p>
-        <p>Nuestra aplicación realiza un OCR y convierte imágenes en PDF para que puedas organizar tus archivos de manera rápida y sencilla. Además, modificamos los nombres de los archivos para que sean útiles y fáciles de encontrar. Y para ahorrar espacio, todos los documentos generados se pasan a un archivo ZIP. De esta manera podras subir tus archivos al servicio de nube de tu preferencia y tener todo debidamente organizado, manteniendo tu tus archivos faciles de encontrar a la vez que ahorras espacio y dinero.</p>
-        <p> La administración de archivos personales nunca ha sido tan fácil. ¡Únete a nuestra aplicación hoy mismo y comienza a tener control total sobre tus archivos personales!</p>
-      </body>
-    </html>
-    '''
-    return render_template_string(home_template)
+    return render_template('index.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        conn = create_connection()
+        username = request.form['username']
+        password = request.form['password']
+        if login_user(conn, username, password):
+            # Iniciar sesión almacenando el nombre de usuario en la sesión
+            session['username'] = username
+            conn.close()
+            return redirect(url_for('upload_file'))
+        else:
+            conn.close()
+            return render_template('login.html', error_message="Credenciales inválidas.")
+
+    return render_template('login.html')
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        conn = create_connection()
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        # Verificar si el usuario ya existe en la base de datos
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (username, email))
+        result = cursor.fetchone()
+        if result:
+            if result[1] == username:
+                return render_template('register.html', error_message="El nombre de usuario ya está registrado.")
+            elif result[2] == email:
+                return render_template('register.html', error_message="El correo electrónico ya está registrado.")
+
+        # Registrar al usuario en la base de datos
+        success = register_user(conn, username, email, password, confirm_password)
+        conn.close()
+
+        if success:
+            # Iniciar sesión automáticamente después del registro
+            session['username'] = username
+            return redirect(url_for('upload_file'))
+        else:
+            return render_template('register.html', error_message="Error al registrar el usuario.")
+
+    return render_template('register.html')
+
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
         if 'file' not in request.files:
             return redirect(request.url)
@@ -162,14 +195,18 @@ def upload_file():
             with open(txt_output_path, 'w') as txt_file:
                 txt_file.write(text)
 
-            # Save the original PDF or converted image to PDF with the custom name
+            # Save the original PDF or convert the image to PDF with the custom name
             pdf_output_path = os.path.join(app.config['OUTPUT_FOLDER'], custom_pdf_filename)
             if file_extension == 'pdf':
                 shutil.copyfile(filepath, pdf_output_path)
             else:
-                with open(pdf_output_path, "wb") as f:
-                    img_data = img2pdf.convert(filepath)
-                    f.write(img_data)
+                images = [filepath]
+                pdf = fitz.open()
+                for image in images:
+                    img = fitz.open(image)
+                    pdf.insert_pdf(img)
+                pdf.save(pdf_output_path)
+                pdf.close()
 
             # Create a zip file with the text and PDF files
             zip_filename = generate_filename(name, doc_type, date, "zip")
@@ -179,81 +216,50 @@ def upload_file():
                 zipf.write(pdf_output_path, custom_pdf_filename)
 
             # Return the download link for the zip file
-            return send_file(zip_output_path, as_attachment=True, download_name=zip_filename)
+            return send_from_directory(app.config['OUTPUT_FOLDER'], zip_filename, as_attachment=True)
 
-    upload_template = '''
-    <!doctype html>
-    <html lang="es">
-      <head>
-        <meta charset="utf-8">
-        <title>Conversor de documentos</title>
-        ''' + styles + '''
-      </head>
-      <body>
-        ''' + nav_bar + '''
-        <br>
-        <h1>Subir archivo PDF o imagen</h1>
-        <form method=post enctype=multipart/form-data>
-          <label for=name>Nombre:</label>
-          <input type=text name=name required>
-          <br>
-          <label for=doc_type>Tipo de documento:</label>
-          <input type=text name=doc_type required>
-          <br>
-          <label for=date>Fecha:</label>
-          <input type=date name=date required>
-          <br>
-          <label for=file>Archivo:</label>
-          <input type=file name=file>
-          <br>
-          <input type=submit value=Subir>
-        </form>
-      </body>
-    </html>
-    '''
-    return render_template_string(upload_template)
+    return render_template('upload.html')
+
+
 
 @app.route('/about', methods=['GET'])
 def about():
-    about_template = '''
-    <!doctype html>
-    <html lang="es">
-      <head>
-        <meta charset="utf-8">
-        <title>Acerca de</title>
-        ''' + styles + '''
-      </head>
-      <body>
-        ''' + nav_bar + '''
-        <br>
-        <h1>Acerca de</h1>
-        <p>Equipo:</p>
-        <ul>
-          <li>Miembro del equipo 1</li>
-          <li>Miembro del equipo 2</li>
-          <li>Miembro del equipo 3</li>
-          <li>Miembro del equipo 4</li>
-        </ul>
-      </body>
-    </html>
-    '''
-    return render_template_string(about_template)
+    about_template = render_template('about.html')
+    return about_template
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('home'))
+
+
+def process_doc(filepath):
+    doc = Document(filepath)
+    text = ''
+    for paragraph in doc.paragraphs:
+        text += paragraph.text + '\n'
+    return text
+
 
 def process_image(filepath):
-    image = Image.open(filepath)
-    text = pytesseract.image_to_string(image, lang="eng")
-    return text
+    try:
+        image = Image.open(filepath)
+        text = pytesseract.image_to_string(image, lang="eng")
+        return text
+    except IOError:
+        print("Error al procesar la imagen.")
+        return ""
+
+
 
 def process_pdf(filepath):
-    poppler_path = "/usr/bin"  # Suponiendo que las utilidades de Poppler están instaladas en /usr/bin
-    images = convert_from_path(filepath)
+    pdf = fitz.open(filepath)
     text = ""
-    for image in images:
-        text += pytesseract.image_to_string(image, lang="eng")
+    for page in pdf:
+        text += page.get_text("text")
+    pdf.close()
     return text
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-    #app.run(debug=True)
-
-
