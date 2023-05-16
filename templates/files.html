@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lista de Archivos</title>
+</head>
+<body>
+  <h1>Lista de Archivos</h1>
+
+  <table>
+    <tr>
+      <th>Nombre</th>
+      <th>Tamaño</th>
+      <th>Fecha de subida</th>
+    </tr>
+    {% for file in files %}
+    <tr>
+      <td>{{ file.filename }}</td>
+      <td>{{ file.size }}</td>
+      <td>{{ file.upload_date }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>

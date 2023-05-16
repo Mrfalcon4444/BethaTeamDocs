@@ -9,9 +9,11 @@ import os
 from flask import make_response
 import zipfile
 import fitz
-import mysql.connector
 from docx import Document
-
+import firebase_admin
+import datetime
+from firebase_admin import credentials, storage, firestore
+import uuid
 
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'outputs'
@@ -35,77 +37,97 @@ def generate_filename(name, doc_type, date, extension):
     date_part = date.replace("-", "")
     return f"{name_part}_{doc_type_part}_{date_part}.{extension}"
 
-def create_connection():
-    conn = None
-    try:
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",  # No se requiere contraseña para el usuario root
-            database="proyecto"  # Nombre de tu base de datos
-        )
-        print('Conexión a la base de datos establecida.')
-    except mysql.connector.Error as e:
-        print(f'Error al conectar a la base de datos: {e}')
-    return conn
-
-def login_user(conn, username, password):
-    sql = '''
-    SELECT * FROM users WHERE username = %s;
-    '''
-    try:
-        cursor = conn.cursor()
-        cursor.execute(sql, (username,))
-        result = cursor.fetchone()
-        if result:
-            stored_password = result[3]
-            hashed_password = hashlib.sha256(password.encode()).hexdigest()
-            if hashed_password == stored_password:
-                print('Inicio de sesión exitoso.')
-                return True
-            else:
-                print('Credenciales inválidas.')
-                return False
-        else:
-            print('Credenciales inválidas.')
-            return False
-    except mysql.connector.Error as e:
-        print(f'Error al iniciar sesión: {e}')
-        return False
+def initialize_firestore():
+    # Inicializar Firebase usando el archivo JSON de configuración
+    cred = credentials.Certificate("bethateam-b77e0-firebase-adminsdk-yz1cz-bddd759545.json")
+    firebase_admin.initialize_app(cred, {'storageBucket': 'bethateam-b77e0.appspot.com'})
+    print("Firebase inicializado correctamente.")
 
 
-def register_user(conn, username, email, password, confirm_password):
-    if password != confirm_password:
-        print("Las contraseñas no coinciden.")
-        return False
-    
-    try:
-        cursor = conn.cursor()
-        
-        # Verificar si el usuario ya existe en la base de datos (por nombre de usuario o correo electrónico)
-        sql = "SELECT * FROM users WHERE username = %s OR email = %s"
-        cursor.execute(sql, (username, email))
-        result = cursor.fetchone()
-        if result:
-            if result[1] == username:
-                print("El nombre de usuario ya está registrado.")
-            elif result[2] == email:
-                print("El correo electrónico ya está registrado.")
-            return False
+def login_user(username, password):
+    # Realizar la lógica de inicio de sesión utilizando Firestore
+    users_ref = firestore.client().collection('users')
+    query = users_ref.where('username', '==', username).limit(1)
+    result = query.stream()
 
-        # Registrar al usuario en la base de datos
+    for doc in result:
+        stored_password = doc.to_dict().get('password')
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-        sql = "INSERT INTO users (username, email, password, confirm_password) VALUES (%s, %s, %s, %s)"
-        values = (username, email, hashed_password, confirm_password)
-        cursor.execute(sql, values)
-        conn.commit()
-        print('Usuario registrado exitosamente.')
-        return True
-    
-    except mysql.connector.Error as e:
-        print(f'Error al registrar el usuario: {e}')
+        if hashed_password == stored_password:
+            print('Inicio de sesión exitoso.')
+            return True
+
+    print('Credenciales inválidas.')
+    return False
+
+def register_user(username, email, password, confirm_password):
+    # Realizar la lógica de registro de usuarios utilizando Firestore
+    users_ref = firestore.client().collection('users')
+    query = users_ref.where('username', '==', username).limit(1)
+    result = query.stream()
+
+    if len(list(result)) > 0:
+        print("El nombre de usuario ya está registrado.")
         return False
-    
+
+    user_data = {
+        'username': username,
+        'email': email,
+        'password': hashlib.sha256(password.encode()).hexdigest(),
+        'confirm_password': confirm_password
+    }
+    users_ref.document(str(uuid.uuid4())).set(user_data)
+    print('Usuario registrado exitosamente.')
+    return True
+
+from werkzeug.utils import secure_filename
+from firebase_admin import storage as firebase_storage
+
+def upload():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            name = request.form['name']
+            doc_type = request.form['doc_type']
+            date = request.form['date']
+            filename = secure_filename(file.filename)
+
+            # Subir el archivo directamente a Firebase Storage
+            firebase_filename = generate_filename(name, doc_type, date, "pdf")
+            bucket = firebase_storage.bucket()
+            blob = bucket.blob(firebase_filename)
+            blob.upload_from_file(file.stream, content_type=file.content_type)
+
+            # Obtener detalles del archivo subido
+            file_size = file.content_length
+            upload_date = datetime.datetime.now()
+
+            # Guardar detalles del archivo en Firestore
+            file_data = {
+                'filename': firebase_filename,
+                'name': name,
+                'doc_type': doc_type,
+                'date': date,
+                'size': file_size,
+                'upload_date': upload_date
+            }
+            # Asumiendo que tienes una colección 'files' en Firestore
+            files_ref = firestore.client().collection('files')
+            files_ref.add(file_data)
+
+            return redirect(url_for('home'))
+
+    return render_template('upload.html')
+
+
+
 
 @app.route('/', methods=['GET'])
 def home():
@@ -114,16 +136,13 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        conn = create_connection()
         username = request.form['username']
         password = request.form['password']
-        if login_user(conn, username, password):
+        if login_user(username, password):
             # Iniciar sesión almacenando el nombre de usuario en la sesión
             session['username'] = username
-            conn.close()
             return redirect(url_for('upload_file'))
         else:
-            conn.close()
             return render_template('login.html', error_message="Credenciales inválidas.")
 
     return render_template('login.html')
@@ -132,32 +151,36 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        conn = create_connection()
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
 
         # Verificar si el usuario ya existe en la base de datos
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE username = %s OR email = %s", (username, email))
-        result = cursor.fetchone()
-        if result:
-            if result[1] == username:
-                return render_template('register.html', error_message="El nombre de usuario ya está registrado.")
-            elif result[2] == email:
-                return render_template('register.html', error_message="El correo electrónico ya está registrado.")
+        users_ref = firestore.client().collection('users')
+        query = users_ref.where('username', '==', username).limit(1)
+        result = query.stream()
+
+        if len(list(result)) > 0:
+            return render_template('register.html', error_message="El nombre de usuario ya está registrado.")
+
+        # Verificar si las contraseñas coinciden
+        if password != confirm_password:
+            return render_template('register.html', error_message="Las contraseñas no coinciden. Por favor, inténtalo de nuevo.")
 
         # Registrar al usuario en la base de datos
-        success = register_user(conn, username, email, password, confirm_password)
-        conn.close()
+        user_data = {
+            'username': username,
+            'email': email,
+            'password': hashlib.sha256(password.encode()).hexdigest(),
+            'confirm_password': confirm_password
+        }
+        users_ref.document(str(uuid.uuid4())).set(user_data)
 
-        if success:
-            # Iniciar sesión automáticamente después del registro
-            session['username'] = username
-            return redirect(url_for('upload_file'))
-        else:
-            return render_template('register.html', error_message="Error al registrar el usuario.")
+        # Iniciar sesión automáticamente después del registro
+        session['username'] = username
+
+        return redirect(url_for('upload_file'))
 
     return render_template('register.html')
 
@@ -177,48 +200,50 @@ def upload_file():
             name = request.form['name']
             doc_type = request.form['doc_type']
             date = request.form['date']
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
 
-            file_extension = filename.rsplit('.', 1)[1].lower()
-            if file_extension == 'pdf':
-                text = process_pdf(filepath)
-            else:
-                text = process_image(filepath)
+            # Subir el archivo directamente a Firebase Storage
+            firebase_filename = generate_filename(name, doc_type, date, "pdf")
+            bucket = firebase_storage.bucket()
+            blob = bucket.blob(firebase_filename)
+            blob.upload_from_file(file.stream, content_type=file.content_type)
 
-            custom_txt_filename = generate_filename(name, doc_type, date, "txt")
-            custom_pdf_filename = generate_filename(name, doc_type, date, "pdf")
+            # Obtener detalles del archivo subido
+            file_size = file.content_length
+            upload_date = datetime.datetime.now()
 
-            # Save the text file
-            txt_output_path = os.path.join(app.config['OUTPUT_FOLDER'], custom_txt_filename)
-            with open(txt_output_path, 'w') as txt_file:
-                txt_file.write(text)
+            # Guardar detalles del archivo en Firestore
+            file_data = {
+                'filename': firebase_filename,
+                'name': name,
+                'doc_type': doc_type,
+                'date': date,
+                'size': file_size,
+                'upload_date': upload_date
+            }
+            # Asumiendo que tienes una colección 'files' en Firestore
+            files_ref = firestore.client().collection('files')
+            files_ref.add(file_data)
 
-            # Save the original PDF or convert the image to PDF with the custom name
-            pdf_output_path = os.path.join(app.config['OUTPUT_FOLDER'], custom_pdf_filename)
-            if file_extension == 'pdf':
-                shutil.copyfile(filepath, pdf_output_path)
-            else:
-                images = [filepath]
-                pdf = fitz.open()
-                for image in images:
-                    img = fitz.open(image)
-                    pdf.insert_pdf(img)
-                pdf.save(pdf_output_path)
-                pdf.close()
-
-            # Create a zip file with the text and PDF files
-            zip_filename = generate_filename(name, doc_type, date, "zip")
-            zip_output_path = os.path.join(app.config['OUTPUT_FOLDER'], zip_filename)
-            with zipfile.ZipFile(zip_output_path, 'w') as zipf:
-                zipf.write(txt_output_path, custom_txt_filename)
-                zipf.write(pdf_output_path, custom_pdf_filename)
-
-            # Return the download link for the zip file
-            return send_from_directory(app.config['OUTPUT_FOLDER'], zip_filename, as_attachment=True)
+            return redirect(url_for('home'))
 
     return render_template('upload.html')
+
+
+
+@app.route('/files', methods=['GET'])
+def files():
+    # Obtener la lista de archivos desde Firestore
+    files_ref = firestore.client().collection('files')
+    files = files_ref.get()
+
+    # Preparar los datos para el renderizado en 'files.html'
+    files_data = []
+    for file in files:
+        file_data = file.to_dict()
+        files_data.append(file_data)
+
+    # Renderizar 'files.html' con la lista de archivos
+    return render_template('files.html', files=files_data)
 
 
 
@@ -262,4 +287,6 @@ def process_pdf(filepath):
 
 
 if __name__ == '__main__':
+    initialize_firestore()
+
     app.run(host='0.0.0.0', port=5000, debug=True)

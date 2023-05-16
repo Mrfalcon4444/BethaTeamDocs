@@ -11,15 +11,19 @@
 
         <ul class="menu">
             <li><a href="{{ url_for('home') }}">Inicio</a></li>
-            {% if 'username' in session %}
-                <li><a href="{{ url_for('upload_file') }}">Conversión</a></li>
-            {% endif %}
             <li><a href="{{ url_for('about') }}">Acerca de</a></li>
             {% if 'username' not in session %}
                 <li><a href="{{ url_for('login') }}">Iniciar sesión</a></li>
                 <li><a href="{{ url_for('register') }}">Registro</a></li>
             {% endif %}
+            {% if 'username' in session %}
+                <li><a href="{{ url_for('upload_file') }}">Conversión</a></li>
+                <li><a href="{{ url_for('files') }}">Archivos</a></li>
+                <li>Bienvenido(a), {{ session['username'] }}</li>
+                <li><a href="{{ url_for('logout') }}">Cerrar sesión</a></li>
+            {% endif %}
         </ul>
+        
     </nav>
 
     <div class="container">
