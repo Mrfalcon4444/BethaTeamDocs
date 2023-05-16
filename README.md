@@ -31,7 +31,7 @@ Betha Team es una aplicación web que ofrece una solución integral para la admi
   - Archivos:
   ![Almacenamiento de Storage](ImagenesReadme/AlmacenamientoFile.jpg)
   
-  ![Pagina de Archivos](ImagenesReadme/Pagfile.jpg)
+  ![Pagina de Archivos](ImagenesReadme/pagfile.jpg)
 
   - Archivos:
   ![Descargas](ImagenesReadme/archivosdescargar.jpg)
