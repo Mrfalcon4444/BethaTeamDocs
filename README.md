@@ -22,32 +22,42 @@ Betha Team es una aplicación web que ofrece una solución integral para la admi
   
   ![ConversorLlenado](ImagenesReadme/LlenadoConversion.jpg)
 
-- Descargas:
-  ![Descargas](ImagenesReadme/Destacar.jpg)
+- Almacenamiento - Base de datos:
+  ![Base de datos Files](ImagenesReadme/BaseFireFile.jpg)
+  
+  
+  ![Base de datos Users](ImagenesReadme/BaseUsersFire.jpg)
+  
+  - Archivos:
+  ![Almacenamiento de Storage](ImagenesReadme/AlmacenamientoFile.jpg)
+  
+  ![Pagina de Archivos](ImagenesReadme/Pagfile.jpg)
 
+  - Archivos:
+  ![Descargas](ImagenesReadme/archivosdescargar.jpg)
+  
+  
 ## Requerimientos e Instalación
 
 Antes de ejecutar la aplicación, asegúrate de tener instalados los siguientes componentes:
 
-  Python 3.7 o superior
-  Flask
-  SQLAlchemy
-  Flask-Login
-  Flask-WTF
-  Pillow
-  PyPDF2
-  PyMuPDF
-  Flask-Migrate
-  Flask-Moment
-  Y más.................
-
-Para instalar el programa, sigue estos pasos:
-
-1. Clona el repositorio en tu máquina local: `git clone https://github.com/tuusuario/turepositorio.git`
-2. Accede al directorio del proyecto: `cd turepositorio`
-3. Instala las dependencias del proyecto: `pip install -r requirements.txt`
-4. Configura las variables de entorno y ajusta la configuración según sea necesario.
-5. Ejecuta la aplicación: `python app.py`
+  - Python 3.7 o superior
+  - Flask
+  - hashlib
+  - shutil
+  - flask
+  - werkzeug
+  - PIL (Image)
+  - pytesseract
+  - pdf2image
+  - os
+  - zipfile
+  - io
+  - fitz
+  - docx
+  - firebase_admin
+  - datetime
+  - uuid
 
 ## Uso
 
@@ -55,11 +65,11 @@ Una vez que la aplicación esté en funcionamiento, podrás realizar las siguien
 
 - Iniciar sesión con tu cuenta existente o registrarte para crear una nueva cuenta.
 - Navegar por la plataforma y acceder a todas las funcionalidades disponibles.
-- Cargar archivos a la plataforma y organizarlos en categorías y etiquetas.
-- Utilizar las herramientas de búsqueda, categorización y descarga para administrar tus archivos de manera eficiente.
+- Cargar archivos a la plataforma.
+- Utilizar las herramientas de descarga para administrar tus archivos de manera eficiente.
 - Convertir archivos a diferentes formatos según tus necesidades.
-- Compartir archivos con otros usuarios y colaborar en proyectos.
 - Mantener la seguridad y privacidad de tus datos mediante sistemas de autenticación y encriptación.
+- Acceder a la página de archivos para ver la lista de tus archivos y descargarlos según sea necesario.
 
 ## Autor
 
