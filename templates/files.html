@@ -1,24 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Lista de Archivos</title>
+    <title>Archivos</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-  <h1>Lista de Archivos</h1>
+    <nav>
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
 
-  <table>
-    <tr>
-      <th>Nombre</th>
-      <th>Tamaño</th>
-      <th>Fecha de subida</th>
-    </tr>
-    {% for file in files %}
-    <tr>
-      <td>{{ file.filename }}</td>
-      <td>{{ file.size }}</td>
-      <td>{{ file.upload_date }}</td>
-    </tr>
-    {% endfor %}
+      <ul class="menu">
+        <li><a href="{{ url_for('home') }}">Inicio</a></li>
+        {% if 'username' in session %}
+          <li><a href="{{ url_for('upload_file') }}">Conversión</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('about') }}">Acerca de</a></li>
+        {% if 'username' in session %}
+          <li>Bienvenido(a), {{ session['username'] }}</li>
+          <li><a href="{{ url_for('logout') }}">Cerrar sesión</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}">Iniciar sesión</a></li>
+          <li><a href="{{ url_for('register') }}">Registro</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    <h1>Archivos</h1>
+
+    <table class="file-table">
+      <tr>
+          <th>Nombre</th>
+          <th>Tipo de archivo</th>
+          <th>Tamaño</th>
+          <th>Fecha de carga</th>
+          <th>Acciones</th>
+      </tr>
+      {% for file in files %}
+      <tr>
+          <td>{{ file.name }}</td>
+          <td>{{ file.doc_type }}</td>
+          <td>{{ file.size }}</td>
+          <td>{{ file.upload_date }}</td>
+          <td><a href="{{ url_for('download_file', id=file.id) }}" class="download-link">Descargar</a></td>
+      </tr>
+      {% endfor %}
   </table>
 </body>
 </html>

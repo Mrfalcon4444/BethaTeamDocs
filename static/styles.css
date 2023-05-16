@@ -4,6 +4,11 @@ body {
     padding: 0;
 }
 
+h1 {
+    text-align: center;
+    margin-top: 20px;
+}
+
 .container {
     max-width: 800px;
     margin: 50px auto;
@@ -286,3 +291,47 @@ input[type="submit"]:hover {
     margin: 20px 0; /* Ajusta el margen según sea necesario */
   }
   
+
+  /* Estilos de la tabla de archivos */
+
+.file-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.file-table th, .file-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ccc;
+}
+
+.file-table th {
+    font-weight: bold;
+    background-color: #f2f2f2;
+}
+
+/* Estilos de los enlaces de descarga */
+
+.download-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.download-link:hover {
+    text-decoration: underline;
+}
+
+/* Estilos del menú de navegación */
+
+.menu li {
+    margin-left: 10px;
+}
+
+.menu li a {
+    color: #333;
+    text-decoration: none;
+}
+
+.menu li a:hover {
+    text-decoration: underline;
+}

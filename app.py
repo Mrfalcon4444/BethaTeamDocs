@@ -8,6 +8,7 @@ from pdf2image import convert_from_path
 import os
 from flask import make_response
 import zipfile
+import io
 import fitz
 from docx import Document
 import firebase_admin
@@ -218,11 +219,13 @@ def upload_file():
                 'doc_type': doc_type,
                 'date': date,
                 'size': file_size,
-                'upload_date': upload_date
+                'upload_date': upload_date,
+                'username': session['username']  # Agrega el nombre de usuario desde la sesión
             }
             # Asumiendo que tienes una colección 'files' en Firestore
             files_ref = firestore.client().collection('files')
             files_ref.add(file_data)
+
 
             return redirect(url_for('home'))
 
@@ -230,21 +233,49 @@ def upload_file():
 
 
 
-@app.route('/files', methods=['GET'])
-def files():
-    # Obtener la lista de archivos desde Firestore
+@app.route('/archivos')
+def archivos():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    # Obtén los archivos del usuario actual desde Firestore
     files_ref = firestore.client().collection('files')
-    files = files_ref.get()
+    files_query = files_ref.where('username', '==', session['username']).get()
+    files = []
 
-    # Preparar los datos para el renderizado en 'files.html'
-    files_data = []
-    for file in files:
-        file_data = file.to_dict()
-        files_data.append(file_data)
+    for file_doc in files_query:
+        file_data = file_doc.to_dict()
+        file_data['id'] = file_doc.id
+        files.append(file_data)
 
-    # Renderizar 'files.html' con la lista de archivos
-    return render_template('files.html', files=files_data)
+    return render_template('files.html', files=files)
 
+
+@app.route('/download/<id>', methods=['GET'])
+def download_file(id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    # Verificar si el archivo existe y pertenece al usuario actual
+    file_ref = firestore.client().collection('files').document(id)
+    file_data = file_ref.get().to_dict()
+    if not file_data or file_data['username'] != session['username']:
+        return "Error: El archivo no existe o no pertenece al usuario actual."
+
+    # Obtener referencia al archivo en Storage
+    storage_bucket = storage.bucket()
+    blob = storage_bucket.blob(file_data['filename'])
+
+    # Descargar el archivo desde Storage
+    file_content = io.BytesIO()
+    blob.download_to_file(file_content)
+    file_content.seek(0)
+
+    # Crear una respuesta para devolver el archivo al cliente
+    response = send_file(file_content, download_name=file_data['filename'])
+    response.headers['Content-Length'] = str(blob.size)
+
+    return response
 
 
 @app.route('/about', methods=['GET'])
